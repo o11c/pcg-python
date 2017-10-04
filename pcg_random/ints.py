@@ -172,9 +172,10 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
         MASK = BITS - 1
         return self._make(value >> rot | value << (-rot & MASK))
 
-    def urandom(self):
+    @classmethod
+    def urandom(cls):
         import os
-        return self._make(int.from_bytes(os.urandom(self.BYTES), 'big'))
+        return cls._make(int.from_bytes(os.urandom(cls.BYTES), 'big'))
 
 
 class uint8_t(_unsigned_int_base): BITS = 8

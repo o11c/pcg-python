@@ -164,6 +164,7 @@ def pcg_test(RNG, TWO_ARG_INIT, advance=True, file=None):
     # Many of the generators can be initialized with two arguments; the second
     # one specifies the stream.
 
+    getattr(pcg_random, RNG)() # make sure default seeding works too
     rng = getattr(pcg_random, RNG)(seed=False)
     # Hm, maybe we should allow seeding from bare integers?
     # But then, this *is* just the test suite ...
