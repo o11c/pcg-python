@@ -1,3 +1,21 @@
+# PCG Random Number Generation for C++ (ported to Python)
+#
+# Copyright 2017 Ben Longbons <brlongbons@gmail.com>
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+#
+# Licensed under the Apache License, Version 2.0 (provided in
+# LICENSE-APACHE.txt and at http://www.apache.org/licenses/LICENSE-2.0)
+# or under the MIT license (provided in LICENSE-MIT.txt and at
+# http://opensource.org/licenses/MIT), at your option. This file may not
+# be copied, modified, or distributed except according to those terms.
+#
+# Distributed on an "AS IS" BASIS, WITHOUT WARRANTY OF ANY KIND, either
+# express or implied.  See your chosen license for details.
+#
+# For additional information about the PCG random number generation scheme,
+# visit http://www.pcg-random.org/.
+
 from pcg_random.ints import *
 
 import pytest
@@ -77,6 +95,7 @@ class TestInts:
 
     def test_u8(self, u=uint8_t):
         assert u.BITS == 8
+        assert u.NYBBLES == 2
         assert u.BYTES == 1
         assert u.MASK == 0xff
         assert u.MOD == 0x100
@@ -85,6 +104,7 @@ class TestInts:
 
     def test_u16(self, u=uint16_t):
         assert u.BITS == 16
+        assert u.NYBBLES == 4
         assert u.BYTES == 2
         assert u.MASK == 0xffff
         assert u.MOD == 0x10000
@@ -93,6 +113,7 @@ class TestInts:
 
     def test_u32(self, u=uint32_t):
         assert u.BITS == 32
+        assert u.NYBBLES == 8
         assert u.BYTES == 4
         assert u.MASK == 0xffffffff
         assert u.MOD == 0x100000000
@@ -101,6 +122,7 @@ class TestInts:
 
     def test_u64(self, u=uint64_t):
         assert u.BITS == 64
+        assert u.NYBBLES == 16
         assert u.BYTES == 8
         assert u.MASK == 0xffffffffffffffff
         assert u.MOD == 0x10000000000000000
@@ -109,6 +131,7 @@ class TestInts:
 
     def test_u128(self, u=uint128_t):
         assert u.BITS == 128
+        assert u.NYBBLES == 32
         assert u.BYTES == 16
         assert u.MASK == 0xffffffffffffffffffffffffffffffff
         assert u.MOD == 0x100000000000000000000000000000000

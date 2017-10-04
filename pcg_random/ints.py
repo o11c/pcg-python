@@ -1,5 +1,20 @@
-import os
-import sys
+# PCG Random Number Generation for C++ (ported to Python)
+#
+# Copyright 2017 Ben Longbons <brlongbons@gmail.com>
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+#
+# Licensed under the Apache License, Version 2.0 (provided in
+# LICENSE-APACHE.txt and at http://www.apache.org/licenses/LICENSE-2.0)
+# or under the MIT license (provided in LICENSE-MIT.txt and at
+# http://opensource.org/licenses/MIT), at your option. This file may not
+# be copied, modified, or distributed except according to those terms.
+#
+# Distributed on an "AS IS" BASIS, WITHOUT WARRANTY OF ANY KIND, either
+# express or implied.  See your chosen license for details.
+#
+# For additional information about the PCG random number generation scheme,
+# visit http://www.pcg-random.org/.
 
 
 # TODO once 3.6 becomes common, just use __init_subclass__
@@ -10,6 +25,8 @@ class _unsigned_int_meta(type):
         if 'BITS' in cls.__dict__:
             cls.MOD = 1 << cls.BITS
             cls.MASK = cls.MOD - 1
+            if not cls.BITS % 4:
+                cls.NYBBLES = cls.BITS // 4
             if not cls.BITS % 8:
                 cls.BYTES = cls.BITS // 8
         if hasattr(cls, 'BITS'):
@@ -26,7 +43,7 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
 
     def __repr__(self):
         cls = self.__class__
-        cls_name = '%s.%s' % (cls.__module__, cls.__qualname__)
+        cls_name = cls.__qualname__
         return '%s(%r)' % (cls_name, self._value)
 
     @staticmethod
@@ -97,6 +114,7 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
 
     def __int__(self):
         return self._value
+    __index__ = __int__
 
     def __invert__(self):
         return self._make(~self._value)
@@ -155,6 +173,7 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
         return self._make(value >> rot | value << (-rot & MASK))
 
     def urandom(self):
+        import os
         return self._make(int.from_bytes(os.urandom(self.BYTES), 'big'))
 
 
@@ -163,4 +182,4 @@ class uint16_t(_unsigned_int_base): BITS = 16
 class uint32_t(_unsigned_int_base): BITS = 32
 class uint64_t(_unsigned_int_base): BITS = 64
 class uint128_t(_unsigned_int_base): BITS = 128
-class uintptr_t(globals()['uint%d_t' % (sys.maxsize.bit_length() + 1)]): pass
+class uintptr_t(globals()['uint%d_t' % (__import__('sys').maxsize.bit_length() + 1)]): pass
