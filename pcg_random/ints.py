@@ -1,3 +1,4 @@
+import os
 import sys
 
 
@@ -84,10 +85,12 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
     def __add__(self, other):
         other = self._coerce_value(other)
         return self._make(self._value + other)
+    __radd__ = __add__
 
     def __and__(self, other):
         other = self._coerce_value(other)
         return self._make(self._value & other)
+    __rand__ = __and__
 
     def __bool__(self):
         return bool(self._value)
@@ -106,6 +109,7 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
     def __mul__(self, other):
         other = self._coerce_value(other)
         return self._make(self._value * other)
+    __rmul__ = __mul__
 
     def __neg__(self):
         return self._make(-self._value)
@@ -113,6 +117,7 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
     def __or__(self, other):
         other = self._coerce_value(other)
         return self._make(self._value | other)
+    __ror__ = __or__
 
     def __rshift__(self, other):
         assert type(other) is int
@@ -122,10 +127,16 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
     def __sub__(self, other):
         other = self._coerce_value(other)
         return self._make(self._value - other)
+    def __rsub__(self, other):
+        # This is the only asymmetrical operation,
+        # since we don't need division or modulus.
+        other = self._coerce_value(other)
+        return self._make(other - self._value)
 
     def __xor__(self, other):
         other = self._coerce_value(other)
         return self._make(self._value ^ other)
+    __rxor__ = __xor__
 
     def rotl(self, rot):
         BITS = self.BITS
@@ -142,6 +153,9 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
         value = self._value
         MASK = BITS - 1
         return self._make(value >> rot | value << (-rot & MASK))
+
+    def urandom(self):
+        return self._make(int.from_bytes(os.urandom(self.BYTES), 'big'))
 
 
 class uint8_t(_unsigned_int_base): BITS = 8

@@ -10,6 +10,11 @@ def eq(a, b):
 
 class TestInts:
     def _test_common(self, u):
+        def x(v):
+            # identity function, for symmetry
+            # x was chosen for being as visually distinct as possible
+            return v
+
         assert eq(u(-1), u(u.MASK))
         assert eq(u(0), u(u.MOD))
         assert eq(u.MAX * u.MAX, u.ONE)
@@ -22,7 +27,11 @@ class TestInts:
         assert 2 >= u(1) >= 0
         assert 0 >= u(0) >= 0
         assert eq(u(6) + u(3), u(9))
+        assert eq(x(6) + u(3), u(9))
+        assert eq(u(6) + x(3), u(9))
         assert eq(u(6) & u(3), u(2))
+        assert eq(x(6) & u(3), u(2))
+        assert eq(u(6) & x(3), u(2))
         assert not u.ZERO
         assert u.ONE and u.MAX
         assert eq(int(u.ZERO), 0)
@@ -33,15 +42,23 @@ class TestInts:
         assert eq(u.HIGH << 1, u.ZERO)
         assert eq(u(1) << 1, u(2))
         assert eq(u(6) * u(3), u(18))
+        assert eq(x(6) * u(3), u(18))
+        assert eq(u(6) * x(3), u(18))
         assert eq(-u(0), u.MAX + 1)
         assert eq(-u(1), u.MAX-0)
         assert eq(-u(2), u.MAX-1)
         assert eq(-u(3), u.MAX-2)
         assert eq(u(6) | u(3), u(7))
+        assert eq(x(6) | u(3), u(7))
+        assert eq(u(6) | x(3), u(7))
         assert eq(u(1) >> 1, u(0))
         assert eq(u(2) >> 1, u(1))
         assert eq(u(6) - u(2), u(4))
+        assert eq(x(6) - u(2), u(4))
+        assert eq(u(6) - x(2), u(4))
         assert eq(u(6) ^ u(3), u(5))
+        assert eq(x(6) ^ u(3), u(5))
+        assert eq(u(6) ^ x(3), u(5))
         assert eq(u(5).rotl(u.BITS - 1), u.HIGH | 2)
         assert eq(u(5).rotl(u.BITS - 2), u.HIGH >> 1 | 1)
         assert eq(u(5).rotl(u.BITS - 3), u.HIGH >> 2 | u.HIGH)
