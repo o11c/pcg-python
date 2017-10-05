@@ -173,9 +173,14 @@ class _unsigned_int_base(metaclass=_unsigned_int_meta):
         return self._make(value >> rot | value << (-rot & MASK))
 
     @classmethod
-    def urandom(cls):
+    def urandom(cls, count=None):
         import os
-        return cls._make(int.from_bytes(os.urandom(cls.BYTES), 'big'))
+        if count is not None:
+            assert isinstance(count, int) and count > 0
+        if count is None:
+            return cls._make(int.from_bytes(os.urandom(cls.BYTES), 'big'))
+        rb = os.urandom(cls.BYTES * count)
+        return [cls._make(int.from_bytes(rb[i1:i1+cls.BYTES], 'big')) for i1 in range(0, len(rb), cls.BYTES)]
 
 
 class uint8_t(_unsigned_int_base): BITS = 8

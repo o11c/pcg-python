@@ -27,129 +27,107 @@ from pcg_random import pcg_extras
 
 import io
 import pkg_resources
-import pytest
+
+
+alt = object()
 
 
 class TestEngine:
     def test_pcg8_once_insecure(self):
-        do_pcg_test(RNG='pcg8_once_insecure', TWO_ARG_INIT=True)
+        do_pcg_test(RNG='pcg8_once_insecure', SEED_ARG_INIT=2)
     def test_pcg8_oneseq_once_insecure(self):
-        do_pcg_test(RNG='pcg8_oneseq_once_insecure', TWO_ARG_INIT=False)
+        do_pcg_test(RNG='pcg8_oneseq_once_insecure', SEED_ARG_INIT=1)
     def test_pcg16_once_insecure(self):
-        do_pcg_test(RNG='pcg16_once_insecure', TWO_ARG_INIT=True)
+        do_pcg_test(RNG='pcg16_once_insecure', SEED_ARG_INIT=2)
     def test_pcg16_oneseq_once_insecure(self):
-        do_pcg_test(RNG='pcg16_oneseq_once_insecure', TWO_ARG_INIT=False)
+        do_pcg_test(RNG='pcg16_oneseq_once_insecure', SEED_ARG_INIT=1)
     def test_pcg32(self):
-        do_pcg_test(RNG='pcg32', TWO_ARG_INIT=True)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32', SEED_ARG_INIT=2)
     def test_pcg32_c1024(self):
-        do_pcg_test(RNG='pcg32_c1024', TWO_ARG_INIT=True, advance=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_c1024', SEED_ARG_INIT=3, advance=False)
     def test_pcg32_c1024_fast(self):
-        do_pcg_test(RNG='pcg32_c1024_fast', TWO_ARG_INIT=False, advance=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_c1024_fast', SEED_ARG_INIT=alt, advance=False)
     def test_pcg32_c64(self):
-        do_pcg_test(RNG='pcg32_c64', TWO_ARG_INIT=True, advance=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_c64', SEED_ARG_INIT=3, advance=False)
     def test_pcg32_c64_fast(self):
-        do_pcg_test(RNG='pcg32_c64_fast', TWO_ARG_INIT=False, advance=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_c64_fast', SEED_ARG_INIT=alt, advance=False)
     def test_pcg32_c64_oneseq(self):
-        do_pcg_test(RNG='pcg32_c64_oneseq', TWO_ARG_INIT=False, advance=False)
+        do_pcg_test(RNG='pcg32_c64_oneseq', SEED_ARG_INIT=alt, advance=False)
     def test_pcg32_fast(self):
-        do_pcg_test(RNG='pcg32_fast', TWO_ARG_INIT=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_fast', SEED_ARG_INIT=1)
     def test_pcg32_k1024(self):
-        do_pcg_test(RNG='pcg32_k1024', TWO_ARG_INIT=True)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_k1024', SEED_ARG_INIT=3)
     def test_pcg32_k1024_fast(self):
-        do_pcg_test(RNG='pcg32_k1024_fast', TWO_ARG_INIT=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_k1024_fast', SEED_ARG_INIT=alt)
     def test_pcg32_k16384(self):
-        do_pcg_test(RNG='pcg32_k16384', TWO_ARG_INIT=True)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_k16384', SEED_ARG_INIT=3)
     def test_pcg32_k16384_fast(self):
-        do_pcg_test(RNG='pcg32_k16384_fast', TWO_ARG_INIT=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_k16384_fast', SEED_ARG_INIT=alt)
     def test_pcg32_k2(self):
-        do_pcg_test(RNG='pcg32_k2', TWO_ARG_INIT=True)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_k2', SEED_ARG_INIT=3)
     def test_pcg32_k2_fast(self):
-        do_pcg_test(RNG='pcg32_k2_fast', TWO_ARG_INIT=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_k2_fast', SEED_ARG_INIT=alt)
     def test_pcg32_k64(self):
-        do_pcg_test(RNG='pcg32_k64', TWO_ARG_INIT=True)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_k64', SEED_ARG_INIT=3)
     def test_pcg32_k64_fast(self):
-        do_pcg_test(RNG='pcg32_k64_fast', TWO_ARG_INIT=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg32_k64_fast', SEED_ARG_INIT=alt)
     def test_pcg32_k64_oneseq(self):
-        do_pcg_test(RNG='pcg32_k64_oneseq', TWO_ARG_INIT=False)
+        do_pcg_test(RNG='pcg32_k64_oneseq', SEED_ARG_INIT=alt)
     def test_pcg32_once_insecure(self):
-        do_pcg_test(RNG='pcg32_once_insecure', TWO_ARG_INIT=True)
+        do_pcg_test(RNG='pcg32_once_insecure', SEED_ARG_INIT=2)
     def test_pcg32_oneseq(self):
-        do_pcg_test(RNG='pcg32_oneseq', TWO_ARG_INIT=False)
+        do_pcg_test(RNG='pcg32_oneseq', SEED_ARG_INIT=1)
     def test_pcg32_oneseq_once_insecure(self):
-        do_pcg_test(RNG='pcg32_oneseq_once_insecure', TWO_ARG_INIT=False)
+        do_pcg_test(RNG='pcg32_oneseq_once_insecure', SEED_ARG_INIT=1)
     def test_pcg32_unique(self):
         # no output - unique
-        pcg_test(RNG='pcg32_unique', TWO_ARG_INIT=False, advance=False, file=io.StringIO())
+        pcg_test(RNG='pcg32_unique', SEED_ARG_INIT=1, advance=False, file=io.StringIO())
     def test_pcg64(self):
-        do_pcg_test(RNG='pcg64', TWO_ARG_INIT=True)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64', SEED_ARG_INIT=2)
     def test_pcg64_c1024(self):
-        do_pcg_test(RNG='pcg64_c1024', TWO_ARG_INIT=True, advance=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64_c1024', SEED_ARG_INIT=3, advance=False)
     def test_pcg64_c1024_fast(self):
-        do_pcg_test(RNG='pcg64_c1024_fast', TWO_ARG_INIT=False, advance=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64_c1024_fast', SEED_ARG_INIT=alt, advance=False)
     def test_pcg64_c32(self):
-        do_pcg_test(RNG='pcg64_c32', TWO_ARG_INIT=True, advance=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64_c32', SEED_ARG_INIT=3, advance=False)
     def test_pcg64_c32_fast(self):
-        do_pcg_test(RNG='pcg64_c32_fast', TWO_ARG_INIT=False, advance=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64_c32_fast', SEED_ARG_INIT=alt, advance=False)
     def test_pcg64_c32_oneseq(self):
-        do_pcg_test(RNG='pcg64_c32_oneseq', TWO_ARG_INIT=False, advance=False)
+        do_pcg_test(RNG='pcg64_c32_oneseq', SEED_ARG_INIT=alt, advance=False)
     def test_pcg64_fast(self):
-        do_pcg_test(RNG='pcg64_fast', TWO_ARG_INIT=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64_fast', SEED_ARG_INIT=1)
     def test_pcg64_k1024(self):
-        do_pcg_test(RNG='pcg64_k1024', TWO_ARG_INIT=True)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64_k1024', SEED_ARG_INIT=3)
     def test_pcg64_k1024_fast(self):
-        do_pcg_test(RNG='pcg64_k1024_fast', TWO_ARG_INIT=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64_k1024_fast', SEED_ARG_INIT=alt)
     def test_pcg64_k32(self):
-        do_pcg_test(RNG='pcg64_k32', TWO_ARG_INIT=True)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64_k32', SEED_ARG_INIT=3)
     def test_pcg64_k32_fast(self):
-        do_pcg_test(RNG='pcg64_k32_fast', TWO_ARG_INIT=False)
-    @pytest.mark.xfail
+        do_pcg_test(RNG='pcg64_k32_fast', SEED_ARG_INIT=alt)
     def test_pcg64_k32_oneseq(self):
-        do_pcg_test(RNG='pcg64_k32_oneseq', TWO_ARG_INIT=False)
+        do_pcg_test(RNG='pcg64_k32_oneseq', SEED_ARG_INIT=alt)
     def test_pcg64_once_insecure(self):
-        do_pcg_test(RNG='pcg64_once_insecure', TWO_ARG_INIT=True)
+        do_pcg_test(RNG='pcg64_once_insecure', SEED_ARG_INIT=2)
     def test_pcg64_oneseq(self):
-        do_pcg_test(RNG='pcg64_oneseq', TWO_ARG_INIT=False)
+        do_pcg_test(RNG='pcg64_oneseq', SEED_ARG_INIT=1)
     def test_pcg64_oneseq_once_insecure(self):
-        do_pcg_test(RNG='pcg64_oneseq_once_insecure', TWO_ARG_INIT=False)
+        do_pcg_test(RNG='pcg64_oneseq_once_insecure', SEED_ARG_INIT=1)
     def test_pcg64_unique(self):
         # no output - unique
-        pcg_test(RNG='pcg64_unique', TWO_ARG_INIT=False, advance=False, file=io.StringIO())
+        pcg_test(RNG='pcg64_unique', SEED_ARG_INIT=1, advance=False, file=io.StringIO())
     def test_pcg128_once_insecure(self):
-        do_pcg_test(RNG='pcg128_once_insecure', TWO_ARG_INIT=True)
+        do_pcg_test(RNG='pcg128_once_insecure', SEED_ARG_INIT=2)
     def test_pcg128_oneseq_once_insecure(self):
-        do_pcg_test(RNG='pcg128_oneseq_once_insecure', TWO_ARG_INIT=False)
+        do_pcg_test(RNG='pcg128_oneseq_once_insecure', SEED_ARG_INIT=1)
 
-def do_pcg_test(RNG, TWO_ARG_INIT, advance=True):
+def do_pcg_test(RNG, SEED_ARG_INIT, advance=True):
     out = io.StringIO()
-    pcg_test(RNG, TWO_ARG_INIT, advance, file=out)
+    pcg_test(RNG, SEED_ARG_INIT, advance, file=out)
     actual = out.getvalue()
     expected = pkg_resources.resource_string(__name__, 'expected/check-%s.out' % RNG).decode('ascii')
     assert expected == actual
 
-def pcg_test(RNG, TWO_ARG_INIT, advance=True, file=None):
+def pcg_test(RNG, SEED_ARG_INIT, advance=True, file=None):
     ''' This function is based on the demo program for the C generation schemes.
 
         It shows some basic generation tasks.
@@ -164,16 +142,22 @@ def pcg_test(RNG, TWO_ARG_INIT, advance=True, file=None):
     # Many of the generators can be initialized with two arguments; the second
     # one specifies the stream.
 
-    getattr(pcg_random, RNG)() # make sure default seeding works too
+    rng = getattr(pcg_random, RNG)() # make sure default seeding works too
+    rng()
+    rng(3)
     rng = getattr(pcg_random, RNG)(seed=False)
     # Hm, maybe we should allow seeding from bare integers?
     # But then, this *is* just the test suite ...
     #
     # Alternative solution: set properties on the functions.
-    if TWO_ARG_INIT:
-        rng.seed(rng.itype(42), rng.itype(54))
+
+    if SEED_ARG_INIT is alt:
+        seed_args = (rng.itype(42), None, False)
+        SEED_ARG_INIT = 3
     else:
-        rng.seed(rng.itype(42))
+        #           (seed,          stream_seed,   data)
+        seed_args = (rng.itype(42), rng.itype(54), False)
+    rng.seed(*seed_args[:SEED_ARG_INIT])
 
     bits = rng.result_type.BITS
     how_many_nums = (
@@ -192,7 +176,7 @@ def pcg_test(RNG, TWO_ARG_INIT, advance=True, file=None):
     p("      -  period:      2^", rng.period_pow2())
     if rng.streams_pow2() > 0:
          p("   (* 2^", rng.streams_pow2(), " streams)")
-    p("\n      -  size:        ", (rng.itype.BYTES * (1 + rng.can_specify_stream)), " bytes\n\n")
+    p("\n      -  size:        ", rng._byte_sizeof(), " bytes\n\n")
 
     for round in range(1, rounds+1):
         p("Round %d:\n" % round)

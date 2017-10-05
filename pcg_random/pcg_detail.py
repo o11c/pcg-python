@@ -26,9 +26,12 @@
     Last updated for commit 0ca2e8ea6ba212bdfbc6219c2313c45917e34b8d
 '''
 
+import types
+
 from .ints import *
 from . import mixin
 from . import pcg_extras
+from .pointer import *
 
 
 # The LCG generators need some constants to function.  This code lets you
@@ -273,6 +276,15 @@ class Engine:
             # Note that this must come *after* self.set_stream(stream_seed)
             self._state = self._bump(seed + self.increment())
 
+    def __repr__(self):
+        args = list(self.pickle_args())
+        for i, a in enumerate(args):
+            if isinstance(a, type):
+                args[i] = a.__qualname__
+            else:
+                args[i] = repr(a)
+        return 'Engine(%s)' % ', '.join(args)
+
     def copy(self):
         return Engine(*self.pickle_args())
 
@@ -280,28 +292,36 @@ class Engine:
         return (Engine, self.pickle_args())
 
     def pickle_args(self):
-        seed = self._state
+        return self._template_arguments + self._instance_args()
+
+    def _instance_args(self):
+        seed = getattr(self, '_state', False)
+        if seed is False:
+            return (seed, None)
         if not self._is_mcg:
             seed = self._unbump(seed) - self.increment()
         if self.can_specify_stream:
-            return self._template_arguments + (seed, self.stream())
+            return (seed, self.stream())
         else:
-            return self._template_arguments + (seed,)
+            return (seed, None)
 
     def compare_args(self):
         return (self._multiplier(), self.increment(), self._state)
+
+    def _byte_sizeof(self):
+        return self.itype.BYTES * (1 + self.can_specify_stream)
 
     def period_pow2(self):
         return self.state_type.BITS - 2*self._is_mcg
 
     def _bump(self, state):
-        # simple version of __advance(delta=1)
+        # simple version of _staticmethod_advance(delta=1)
         return state * self._multiplier() + self.increment()
 
     def _unbump(self, state):
         # this has to go the long way around :(
         # it's O(log n), where n is self.itype.BITS
-        return self.__advance(state, -1, self._multiplier(), self.increment())
+        return self._staticmethod_advance(state, -1, self._multiplier(), self.increment())
 
     def _base_generate(self):
         rv = self._state = self._bump(self._state)
@@ -322,7 +342,7 @@ class Engine:
             return self._output(self._base_generate())
 
     # quasi-@staticmethod, but needs template arguments
-    def __advance(self, state, delta, cur_mult, cur_plus):
+    def _staticmethod_advance(self, state, delta, cur_mult, cur_plus):
         ''' efficient O(log n) version of n calls to _bump()
 
             The method used here is based on Brown, "Random Number Generation
@@ -349,7 +369,7 @@ class Engine:
         return acc_mult * state + acc_plus
 
     # quasi-@staticmethod, but needs template arguments
-    def __distance(self, cur_state, newstate, cur_mult, cur_plus, mask=-1):
+    def _staticmethod_distance(self, cur_state, newstate, cur_mult, cur_plus, mask=-1):
         itype = self.itype
         assert itype is type(cur_state) is type(newstate) is type(cur_mult) is type(cur_plus)
         assert type(mask) in (itype, int)
@@ -368,10 +388,10 @@ class Engine:
         return distance >> maybe_mcg_shift
 
     def _distance(self, newstate, mask=-1):
-        return self.__distance(self._state, newstate, self._multiplier(), self.increment(), mask)
+        return self._staticmethod_distance(self._state, newstate, self._multiplier(), self.increment(), mask)
 
     def advance(self, delta):
-        self._state = self.__advance(self._state, delta, self._multiplier(), self.increment())
+        self._state = self._staticmethod_advance(self._state, delta, self._multiplier(), self.increment())
 
     def backstep(self, delta):
         self.advance(-delta)
@@ -746,8 +766,277 @@ class xsl_mixin:
 
 
 class inside_out:
-    'NYI'
+    ''' Helper class for Extended.
+
+        In the C++ version this uses private inheritance, but never
+        creates instances. Note that the 'baseclass' here is actually the
+        'extvalclass' in Extended.
+    '''
+    def __init__(self, baseclass):
+        self.baseclass = baseclass
+        self.result_type = baseclass.result_type
+        self.state_type = baseclass.state_type
+        if self.result_type is not self.state_type:
+            raise TypeError("Require a RNG whose output function is a permutation")
+
+    def external_step(self, ptr_randval, i):
+        baseclass = self.baseclass
+        state_type = self.state_type
+        result_type = self.result_type
+
+        state = baseclass.unoutput(ptr_randval.get())
+        state = state * baseclass.multiplier() + baseclass.increment() + state_type(i*2)
+        result = result_type(baseclass.output(state))
+        ptr_randval.put(result)
+        zero = state & state_type(3) if baseclass.is_mcg else state_type.ZERO
+        return result == zero
+
+    def external_advance(self, ptr_randval, i, delta, forwards=True):
+        baseclass = self.baseclass
+        state_type = self.state_type
+        result_type = self.result_type
+
+        state = baseclass.unoutput(ptr_randval.get())
+        mult = baseclass.multiplier()
+        inc = baseclass.increment() + state_type(i*2)
+        zero = state & state_type(3) if baseclass.is_mcg else state_type.ZERO
+        dist_to_zero = baseclass._staticmethod_distance(state, zero, mult, inc)
+        if forwards:
+            crosses_zero = dist_to_zero <= delta
+        else:
+            crosses_zero = (-dist_to_zero) <= delta
+        if not forwards:
+            delta = -delta
+        state = baseclass._staticmethod_advance(state, delta, mult, inc)
+        ptr_randval.put(baseclass.output(state))
+        return crosses_zero
 
 class Extended:
-    'NYI'
-# TODO extended generators
+    ''' From small pieces, greater things are built.
+
+        In the C++ version, this uses inheritance rather than composition.
+    '''
+    def __init__(self,
+            # template arguments
+            table_pow2,
+            advance_pow2,
+            baseclass,
+            extvalclass,
+            kdd=True,
+            # instance arguments
+            *seed_args, **seed_kwargs
+    ):
+        self._template_arguments = (table_pow2, advance_pow2, baseclass, extvalclass, kdd)
+        # actually instances (eek!)
+        baseclass = baseclass(seed=False) # seeded at end of __init__
+        extvalclass = extvalclass(seed=False) # only quasi-staticmethods are used
+
+        self.table_pow2 = table_pow2
+        self.advance_pow2 = advance_pow2
+        self.baseclass = baseclass
+        self.extvalclass = extvalclass
+        self.kdd = kdd
+
+        # implicitly copied from base class
+        self.itype = baseclass.itype
+        self.xtype = baseclass.xtype
+        self.MIN = baseclass.MIN
+        self.MAX = baseclass.MAX
+        self.streams_pow2 = baseclass.streams_pow2
+        self.can_specify_stream = baseclass.can_specify_stream
+
+        self.state_type = baseclass.state_type
+        self.result_type = baseclass.result_type
+        self.insideout = inside_out(extvalclass)
+
+        self._rtypebits = self.result_type.BITS
+        self._stypebits = self.state_type.BITS
+
+        self._tick_limit_pow2 = 64
+
+        self._table_size = 1 << table_pow2
+        self._table_shift = self._stypebits - table_pow2
+        self._table_mask = (self.state_type.ONE << table_pow2) - 1
+
+        self._may_tick = advance_pow2 < self._stypebits and advance_pow2 < self._tick_limit_pow2
+        self._tick_shift = self._stypebits - advance_pow2
+        self._tick_mask = (self.state_type.ONE << advance_pow2) - 1 if self._may_tick else self.state_type.MAX
+
+        self._may_tock = self._stypebits < self._tick_limit_pow2
+        self.seed(*seed_args, **seed_kwargs)
+
+    def seed(self, seed=None, stream_seed=None, data=None):
+        if seed is False:
+            assert stream_seed is None
+            assert data is None
+            return
+        self.baseclass.seed(seed, stream_seed)
+        if data is False:
+            self._selfinit()
+        else:
+            if data is True:
+                data = None
+            self._datainit(data)
+
+    def __repr__(self):
+        args = list(self.pickle_args())
+        for i, a in enumerate(args):
+            if isinstance(a, (type, types.FunctionType)):
+                args[i] = a.__qualname__
+            else:
+                args[i] = repr(a)
+        return 'Extended(%s)' % ', '.join(args)
+
+    def copy(self):
+        return Extended(*self.pickle_args())
+
+    def __reduce__(self):
+        return (Extended, self.pickle_args())
+
+    def pickle_args(self):
+        return self._template_arguments + self._instance_args()
+
+    def _instance_args(self):
+        data = getattr(self, '_data', False)
+        return self.baseclass._instance_args() + (data,)
+
+    def _byte_sizeof(self):
+        return self.baseclass._byte_sizeof() + self._table_size * self.result_type.BYTES
+
+    def _advance_table(self, delta=None, isForwards=True):
+        if delta is None:
+            # overloaded 0-arg form
+            carry = False
+            for i in range(self._table_size):
+                if carry:
+                    carry = self.insideout.external_step(ItemPointer(data_, i), i+1)
+                carry2 = self.insideout.external_step(ItemPointer(data_, i), i+1)
+                carry = carry or carry2
+            return
+
+        base_state_t = self.baseclass.state_type
+        ext_state_t = self.extvalclass.state_t
+        basebits = base_state_t.BITS
+        extbits = ext_state_t.BITS
+        assert basebits <= extbits or advance_pow2 > 0, "Current implementation might overflow its carry"
+
+        carry = base_state_t.ZERO
+        for i in range(self._table_size):
+            total_delta = carry + delta
+            trunc_delta = ext_state_t(total_delta)
+            if basebits > extbits:
+                carry = total_delta >> extbits
+            else:
+                carry = base_state_t.ZERO
+            carry += self.insideout.external_advance(ItemPointer(data_, i), i+1, trunc_delta, isForwards)
+
+    def _get_extended_value(self):
+        state = self.baseclass._state
+        if self.kdd and self.baseclass._is_mcg:
+            state >>= 2
+        if self.kdd:
+            index = state & self._table_mask
+        else:
+            index = state >> self._table_shift
+        if self._may_tick:
+            if self.kdd:
+                tick = not (state & self._tick_mask)
+            else:
+                tick = not (state >> self._tick_shift)
+
+            if tick:
+                self.advance_table()
+        if self._may_tock:
+            tock = not state
+            if tock:
+                self.advance_table()
+        return ItemPointer(self._data, index)
+
+    def period_pow2(self):
+        base_period = self.baseclass.period_pow2()
+        ext_period = self.extvalclass.period_pow2()
+        return base_period + self._table_size * ext_period
+
+    def __call__(self, upper_bound=None):
+        if upper_bound is not None:
+            return pcg_extras.bounded_rand(self, upper_bound)
+
+        rhs = self._get_extended_value().get()
+        lhs = self.baseclass()
+        return lhs ^ rhs
+    def set(self, wanted):
+        rhs = self._get_extended_value()
+        lhs = self.baseclass()
+        rhs.put(lhs ^ wanted)
+
+    def advance(self, distance, forwards=True):
+        state_type = self.state_type
+        distance = state_type.coerce(distance)
+
+        assert self.kdd, "Efficient advance is too hard for non-kdd extension. For a weak advance, cast to base class"
+        zero = self.baseclass._state & state_type(3) if self.baseclass._is_mcg else state_type.ZERO
+        if self._may_tick:
+            ticks = distance >> self.advance_pow2
+            adv_mask = self._tick_mask << (2 * self.baseclass._is_mcg)
+            next_advance_distance = self.baseclass._distance(zero, adv_mask)
+            if not forwards:
+                next_advance_distance = (-next_advance_distance) & self._tick_mask
+            if next_advance_distance < (distance & self._tick_mask):
+                ticks += 1
+            if ticks:
+                self.advance_table(ticks, forwards)
+        if forwards:
+            if may_tock and self.distance(zero) <= distance:
+                advance_table()
+            self.baseclass.advance(distance)
+        else:
+            if self._may_tock and -(self.distance(zero)) <= distance:
+                self.advance_table(state_type(1), False)
+            self.baseclass.advance(-distance)
+    def backstep(self, distance):
+        self.advance(distance, False)
+
+    def _selfinit(self):
+        table_size = self._table_size
+        # We need to fill the extended table with something, and we have
+        # very little provided data, so we use the base generator to
+        # produce values.  Although not ideal (use a seed sequence, folks!),
+        # unexpected correlations are mitigated by
+        #      - using XOR differences rather than the number directly
+        #      - the way the table is accessed, its values *won't* be accessed
+        #        in the same order the were written.
+        #      - any strange correlations would only be apparent if we
+        #        were to backstep the generator so that the base generator
+        #        was generating the same values again
+        lhs = self.baseclass()
+        rhs = self.baseclass()
+        xdiff = lhs - rhs
+        self._data = [self.baseclass()^xdiff for _ in range(table_size)]
+
+    def _datainit(self, data):
+        table_size = self._table_size
+
+        if data is None:
+            data = self.result_type.urandom(count=table_size)
+        else:
+            data = list(data)
+            if len(data) != table_size:
+                raise ValueError('data of wrong length')
+        self._data = data
+
+    def __eq__(self, other):
+        if not isinstance(other, Extended):
+            return NotImplemented
+        return self.baseclass == other.baseclass and self._data == other._data
+
+    def __sub__(self, other):
+        if not isinstance(other, Extended):
+            return NotImplemented
+        # Note: this is truncated!
+        # But as long as you haven't advanced more than the baseclass's
+        # period, it will be accurate.
+        #
+        # Unfortunately, I don't understand enough to figure out how to
+        # detect if the appropriate number of wraps (0 or 1) have occurred.
+        # It's *something* to do with the distance from zero ...
+        return self.baseclass - other.baseclass
