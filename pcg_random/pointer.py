@@ -30,7 +30,7 @@ class Pointer(metaclass=abc.ABCMeta):
     def get(self):
         pass
     @abc.abstractmethod
-    def set(self, value):
+    def put(self, value):
         pass
 
 class ValuePointer(Pointer):
@@ -38,7 +38,7 @@ class ValuePointer(Pointer):
         self._value = value
     def get(self):
         return self._value
-    def set(self, value):
+    def put(self, value):
         self._value = value
 
 class ItemPointer(Pointer):
@@ -47,7 +47,7 @@ class ItemPointer(Pointer):
         self._key = key
     def get(self):
         return self._container[self._key]
-    def set(self, value):
+    def put(self, value):
         self._container[self._key] = value
 
 class AttrPointer(Pointer):
@@ -56,7 +56,7 @@ class AttrPointer(Pointer):
         self._attr = attr
     def get(self):
         return getattr(self._obj, self._attr)
-    def set(self, value):
+    def put(self, value):
         setattr(self._obj, self._attr, value)
 
 del abc

@@ -30,6 +30,7 @@
 '''
 from . import pcg_extras, pcg_detail, pcg_engines
 from .pcg_detail import Engine # mostly for isinstance() checks
+from .python import PcgRandom
 
 
 pcg32 = pcg_engines.setseq_xsh_rr_64_32

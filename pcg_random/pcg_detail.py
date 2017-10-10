@@ -611,12 +611,12 @@ class rxs_m_xs_mixin:
         )
         mask = (1 << opbits) - 1
 
-        internal = unxorshift(internal, bits, (2*bits+2)//3)
+        internal = pcg_extras.unxorshift(internal, bits, (2*bits+2)//3)
 
         internal *= mcg_unmultiplier_data[itype]
 
         rshift = int(internal >> (bits - opbits)) & mask if opbits else 0
-        internal = unxorshift(internal, bits, opbits + rshift)
+        internal = pcg_extras.unxorshift(internal, bits, opbits + rshift)
 
         return internal
 
@@ -784,11 +784,11 @@ class inside_out:
         state_type = self.state_type
         result_type = self.result_type
 
-        state = baseclass.unoutput(ptr_randval.get())
-        state = state * baseclass.multiplier() + baseclass.increment() + state_type(i*2)
-        result = result_type(baseclass.output(state))
+        state = baseclass._unoutput(ptr_randval.get())
+        state = state * baseclass._multiplier() + baseclass.increment() + state_type(i*2)
+        result = result_type(baseclass._output(state))
         ptr_randval.put(result)
-        zero = state & state_type(3) if baseclass.is_mcg else state_type.ZERO
+        zero = state & state_type(3) if baseclass._is_mcg else state_type.ZERO
         return result == zero
 
     def external_advance(self, ptr_randval, i, delta, forwards=True):
@@ -796,10 +796,10 @@ class inside_out:
         state_type = self.state_type
         result_type = self.result_type
 
-        state = baseclass.unoutput(ptr_randval.get())
-        mult = baseclass.multiplier()
+        state = baseclass._unoutput(ptr_randval.get())
+        mult = baseclass._multiplier()
         inc = baseclass.increment() + state_type(i*2)
-        zero = state & state_type(3) if baseclass.is_mcg else state_type.ZERO
+        zero = state & state_type(3) if baseclass._is_mcg else state_type.ZERO
         dist_to_zero = baseclass._staticmethod_distance(state, zero, mult, inc)
         if forwards:
             crosses_zero = dist_to_zero <= delta
@@ -808,7 +808,7 @@ class inside_out:
         if not forwards:
             delta = -delta
         state = baseclass._staticmethod_advance(state, delta, mult, inc)
-        ptr_randval.put(baseclass.output(state))
+        ptr_randval.put(baseclass._output(state))
         return crosses_zero
 
 class Extended:
@@ -909,16 +909,16 @@ class Extended:
             carry = False
             for i in range(self._table_size):
                 if carry:
-                    carry = self.insideout.external_step(ItemPointer(data_, i), i+1)
-                carry2 = self.insideout.external_step(ItemPointer(data_, i), i+1)
+                    carry = self.insideout.external_step(ItemPointer(self._data, i), i+1)
+                carry2 = self.insideout.external_step(ItemPointer(self._data, i), i+1)
                 carry = carry or carry2
             return
 
         base_state_t = self.baseclass.state_type
-        ext_state_t = self.extvalclass.state_t
+        ext_state_t = self.extvalclass.state_type
         basebits = base_state_t.BITS
         extbits = ext_state_t.BITS
-        assert basebits <= extbits or advance_pow2 > 0, "Current implementation might overflow its carry"
+        assert basebits <= extbits or self.advance_pow2 > 0, "Current implementation might overflow its carry"
 
         carry = base_state_t.ZERO
         for i in range(self._table_size):
@@ -928,7 +928,7 @@ class Extended:
                 carry = total_delta >> extbits
             else:
                 carry = base_state_t.ZERO
-            carry += self.insideout.external_advance(ItemPointer(data_, i), i+1, trunc_delta, isForwards)
+            carry += int(self.insideout.external_advance(ItemPointer(self._data, i), i+1, trunc_delta, isForwards))
 
     def _get_extended_value(self):
         state = self.baseclass._state
@@ -945,11 +945,11 @@ class Extended:
                 tick = not (state >> self._tick_shift)
 
             if tick:
-                self.advance_table()
+                self._advance_table()
         if self._may_tock:
             tock = not state
             if tock:
-                self.advance_table()
+                self._advance_table()
         return ItemPointer(self._data, index)
 
     def period_pow2(self):
@@ -984,14 +984,14 @@ class Extended:
             if next_advance_distance < (distance & self._tick_mask):
                 ticks += 1
             if ticks:
-                self.advance_table(ticks, forwards)
+                self._advance_table(ticks, forwards)
         if forwards:
-            if may_tock and self.distance(zero) <= distance:
-                advance_table()
+            if self._may_tock and self.distance(zero) <= distance:
+                self._advance_table()
             self.baseclass.advance(distance)
         else:
             if self._may_tock and -(self.distance(zero)) <= distance:
-                self.advance_table(state_type(1), False)
+                self._advance_table(state_type(1), False)
             self.baseclass.advance(-distance)
     def backstep(self, distance):
         self.advance(distance, False)
@@ -1015,13 +1015,17 @@ class Extended:
 
     def _datainit(self, data):
         table_size = self._table_size
+        result_type = self.result_type
 
         if data is None:
-            data = self.result_type.urandom(count=table_size)
+            data = result_type.urandom(count=table_size)
         else:
             data = list(data)
             if len(data) != table_size:
                 raise ValueError('data of wrong length')
+            for d in data:
+                if type(d) is not result_type:
+                    raise TypeError('datum not of result_type')
         self._data = data
 
     def __eq__(self, other):
