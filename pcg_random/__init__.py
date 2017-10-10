@@ -28,8 +28,9 @@
     usually use. Additional wrappers are found in the pcg_engines module.
     Rarely, if ever, do you need the pcg_detail.Engine class directly.
 '''
+
 from . import pcg_extras, pcg_detail, pcg_engines
-from .pcg_detail import Engine # mostly for isinstance() checks
+from .pcg_detail import AbstractEngine, Engine, Extended
 from .python import PcgRandom
 
 
@@ -61,10 +62,12 @@ pcg128_oneseq_once_insecure = pcg_engines.oneseq_xsl_rr_rr_128_128
 # and can be called twice to generate 64 bits, but does not required
 # 128-bit math; on 32-bit systems, it's faster than pcg64 as well.
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsh_rr_64_32)
 def pcg32_k2(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsh_rr_64_32(1, 16, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsh_rs_64_32)
 def pcg32_k2_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsh_rs_64_32(1, 32, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
@@ -78,53 +81,65 @@ def pcg32_k2_fast(*seed_args, **seed_kwargs):
 #
 # (just how good the cryptographic security is is an open question)
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsh_rr_64_32)
 def pcg32_k64(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsh_rr_64_32(6, 16, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_mcg_xsh_rs_64_32)
 def pcg32_k64_oneseq(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_mcg_xsh_rs_64_32(6, 32, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsh_rs_64_32)
 def pcg32_k64_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsh_rs_64_32(6, 32, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsh_rr_64_32)
 def pcg32_c64(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsh_rr_64_32(6, 16, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsh_rs_64_32)
 def pcg32_c64_oneseq(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsh_rs_64_32(6, 32, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_mcg_xsh_rs_64_32)
 def pcg32_c64_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_mcg_xsh_rs_64_32(6, 32, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsl_rr_128_64)
 def pcg64_k32(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsl_rr_128_64(5, 16, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsl_rr_128_64)
 def pcg64_k32_oneseq(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsl_rr_128_64(5, 128, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_mcg_xsl_rr_128_64)
 def pcg64_k32_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_mcg_xsl_rr_128_64(5, 128, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsl_rr_128_64)
 def pcg64_c32(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsl_rr_128_64(5, 16, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsl_rr_128_64)
 def pcg64_c32_oneseq(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsl_rr_128_64(5, 128, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_mcg_xsl_rr_128_64)
 def pcg64_c32_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_mcg_xsl_rr_128_64(5, 128, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
@@ -138,37 +153,45 @@ def pcg64_c32_fast(*seed_args, **seed_kwargs):
 #
 # (just how good the cryptographic security is is an open question)
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsh_rr_64_32)
 def pcg32_k1024(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsh_rr_64_32(10, 16, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsh_rs_64_32)
 def pcg32_k1024_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsh_rs_64_32(10, 32, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsh_rr_64_32)
 def pcg32_c1024(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsh_rr_64_32(10, 16, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsh_rs_64_32)
 def pcg32_c1024_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsh_rs_64_32(10, 32, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsl_rr_128_64)
 def pcg64_k1024(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsl_rr_128_64(10, 16, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsl_rr_128_64)
 def pcg64_k1024_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsl_rr_128_64(10, 128, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsl_rr_128_64)
 def pcg64_c1024(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsl_rr_128_64(10, 16, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsl_rr_128_64)
 def pcg64_c1024_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsl_rr_128_64(10, 128, False, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
@@ -180,10 +203,12 @@ def pcg64_c1024_fast(*seed_args, **seed_kwargs):
 # point in the future.   [Actually, over the full period of the generator, it
 # will produce every 64 KB ZIP file 2^64 times!]
 
+@pcg_engines._alias(wrap=pcg_engines.ext_setseq_xsh_rr_64_32)
 def pcg32_k16384(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_setseq_xsh_rr_64_32(14, 16, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@pcg_engines._alias(wrap=pcg_engines.ext_oneseq_xsh_rs_64_32)
 def pcg32_k16384_fast(*seed_args, **seed_kwargs):
     rv = pcg_engines.ext_oneseq_xsh_rs_64_32(14, 32, True, seed=False)
     rv.seed(*seed_args, **seed_kwargs)

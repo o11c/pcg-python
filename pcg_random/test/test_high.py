@@ -142,22 +142,19 @@ def pcg_test(RNG, SEED_ARG_INIT, advance=True, file=None):
     # Many of the generators can be initialized with two arguments; the second
     # one specifies the stream.
 
-    rng = getattr(pcg_random, RNG)() # make sure default seeding works too
+    rng_class = getattr(pcg_random, RNG)
+    rng = rng_class() # make sure default seeding works too
     rng()
     rng(3)
-    rng = getattr(pcg_random, RNG)(seed=False)
-    # Hm, maybe we should allow seeding from bare integers?
-    # But then, this *is* just the test suite ...
-    #
-    # Alternative solution: set properties on the functions.
 
+    itype = rng_class.itype
     if SEED_ARG_INIT is alt:
-        seed_args = (rng.itype(42), None, False)
+        seed_args = (itype(42), None, False)
         SEED_ARG_INIT = 3
     else:
         #           (seed,          stream_seed,   data)
-        seed_args = (rng.itype(42), rng.itype(54), False)
-    rng.seed(*seed_args[:SEED_ARG_INIT])
+        seed_args = (itype(42), itype(54), False)
+    rng = rng_class(*seed_args[:SEED_ARG_INIT])
 
     bits = rng.result_type.BITS
     how_many_nums = (

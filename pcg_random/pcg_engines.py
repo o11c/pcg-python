@@ -25,71 +25,102 @@ from .ints import *
 from . import pcg_detail
 
 
+def _alias(xtype=None, itype=None, *, wrap=None):
+    # TODO: replace this whole mess.
+    # Template aliases should be generated automatically.
+    # Probably some `inspect.Signature` magic.
+    assert (xtype is None) == (itype is None) != (wrap is None)
+    if wrap is not None:
+        xtype = wrap.xtype
+        itype = wrap.itype
+
+    def decorator(f):
+        f.xtype = xtype
+        f.itype = itype
+        return f
+    return decorator
+
 # Predefined types for XSH RS
 
+@_alias(uint8_t, uint16_t)
 def oneseq_xsh_rs_16_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint8_t, uint16_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint32_t)
 def oneseq_xsh_rs_32_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint16_t, uint32_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint64_t)
 def oneseq_xsh_rs_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint32_t, uint64_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def oneseq_xsh_rs_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint64_t, uint128_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint8_t, uint16_t)
 def unique_xsh_rs_16_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint8_t, uint16_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint32_t)
 def unique_xsh_rs_32_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint16_t, uint32_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint64_t)
 def unique_xsh_rs_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint32_t, uint64_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def unique_xsh_rs_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint64_t, uint128_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint8_t, uint16_t)
 def setseq_xsh_rs_16_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint8_t, uint16_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint32_t)
 def setseq_xsh_rs_32_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint16_t, uint32_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint64_t)
 def setseq_xsh_rs_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint32_t, uint64_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def setseq_xsh_rs_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint64_t, uint128_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint8_t, uint16_t)
 def mcg_xsh_rs_16_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint8_t, uint16_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint32_t)
 def mcg_xsh_rs_32_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint16_t, uint32_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint64_t)
 def mcg_xsh_rs_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint32_t, uint64_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def mcg_xsh_rs_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint64_t, uint128_t, pcg_detail.xsh_rs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
@@ -98,69 +129,85 @@ def mcg_xsh_rs_128_64(*seed_args, **seed_kwargs):
 
 # Predefined types for XSH RR
 
+@_alias(uint8_t, uint16_t)
 def oneseq_xsh_rr_16_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint8_t, uint16_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint32_t)
 def oneseq_xsh_rr_32_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint16_t, uint32_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint64_t)
 def oneseq_xsh_rr_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint32_t, uint64_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def oneseq_xsh_rr_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint64_t, uint128_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint8_t, uint16_t)
 def unique_xsh_rr_16_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint8_t, uint16_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint32_t)
 def unique_xsh_rr_32_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint16_t, uint32_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint64_t)
 def unique_xsh_rr_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint32_t, uint64_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def unique_xsh_rr_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint64_t, uint128_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint8_t, uint16_t)
 def setseq_xsh_rr_16_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint8_t, uint16_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint32_t)
 def setseq_xsh_rr_32_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint16_t, uint32_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint64_t)
 def setseq_xsh_rr_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint32_t, uint64_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def setseq_xsh_rr_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint64_t, uint128_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint8_t, uint16_t)
 def mcg_xsh_rr_16_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint8_t, uint16_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint32_t)
 def mcg_xsh_rr_32_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint16_t, uint32_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint64_t)
 def mcg_xsh_rr_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint32_t, uint64_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def mcg_xsh_rr_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint64_t, uint128_t, pcg_detail.xsh_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
@@ -169,64 +216,79 @@ def mcg_xsh_rr_128_64(*seed_args, **seed_kwargs):
 
 # Predefined types for RXS M XS
 
+@_alias(uint8_t, uint8_t)
 def oneseq_rxs_m_xs_8_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint8_t, uint8_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint16_t)
 def oneseq_rxs_m_xs_16_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint16_t, uint16_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint32_t)
 def oneseq_rxs_m_xs_32_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint32_t, uint32_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint64_t)
 def oneseq_rxs_m_xs_64_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint64_t, uint64_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint128_t, uint128_t)
 def oneseq_rxs_m_xs_128_128(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint128_t, uint128_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint8_t, uint8_t)
 def unique_rxs_m_xs_8_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint8_t, uint8_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint16_t)
 def unique_rxs_m_xs_16_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint16_t, uint16_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint32_t)
 def unique_rxs_m_xs_32_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint32_t, uint32_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint64_t)
 def unique_rxs_m_xs_64_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint64_t, uint64_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint128_t, uint128_t)
 def unique_rxs_m_xs_128_128(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint128_t, uint128_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint8_t, uint8_t)
 def setseq_rxs_m_xs_8_8(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint8_t, uint8_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint16_t, uint16_t)
 def setseq_rxs_m_xs_16_16(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint16_t, uint16_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint32_t, uint32_t)
 def setseq_rxs_m_xs_32_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint32_t, uint32_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint64_t)
 def setseq_rxs_m_xs_64_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint64_t, uint64_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint128_t, uint128_t)
 def setseq_rxs_m_xs_128_128(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint128_t, uint128_t, pcg_detail.rxs_m_xs_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
@@ -237,37 +299,45 @@ def setseq_rxs_m_xs_128_128(*seed_args, **seed_kwargs):
 
 # Predefined types for XSL RR (only defined for "large" types)
 
+@_alias(uint32_t, uint64_t)
 def oneseq_xsl_rr_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint32_t, uint64_t, pcg_detail.xsl_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def oneseq_xsl_rr_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint64_t, uint128_t, pcg_detail.xsl_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint32_t, uint64_t)
 def unique_xsl_rr_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint32_t, uint64_t, pcg_detail.xsl_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def unique_xsl_rr_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint64_t, uint128_t, pcg_detail.xsl_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint32_t, uint64_t)
 def setseq_xsl_rr_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint32_t, uint64_t, pcg_detail.xsl_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def setseq_xsl_rr_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint64_t, uint128_t, pcg_detail.xsl_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint32_t, uint64_t)
 def mcg_xsl_rr_64_32(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint32_t, uint64_t, pcg_detail.xsl_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint64_t, uint128_t)
 def mcg_xsl_rr_128_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.mcg_base(uint64_t, uint128_t, pcg_detail.xsl_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
@@ -276,28 +346,34 @@ def mcg_xsl_rr_128_64(*seed_args, **seed_kwargs):
 
 # Predefined types for XSL RR RR (only defined for "large" types)
 
+@_alias(uint64_t, uint64_t)
 def oneseq_xsl_rr_rr_64_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint64_t, uint64_t, pcg_detail.xsl_rr_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint128_t, uint128_t)
 def oneseq_xsl_rr_rr_128_128(*seed_args, **seed_kwargs):
     rv = pcg_detail.oneseq_base(uint128_t, uint128_t, pcg_detail.xsl_rr_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint64_t, uint64_t)
 def unique_xsl_rr_rr_64_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint64_t, uint64_t, pcg_detail.xsl_rr_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint128_t, uint128_t)
 def unique_xsl_rr_rr_128_128(*seed_args, **seed_kwargs):
     rv = pcg_detail.unique_base(uint128_t, uint128_t, pcg_detail.xsl_rr_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(uint64_t, uint64_t)
 def setseq_xsl_rr_rr_64_64(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint64_t, uint64_t, pcg_detail.xsl_rr_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(uint128_t, uint128_t)
 def setseq_xsl_rr_rr_128_128(*seed_args, **seed_kwargs):
     rv = pcg_detail.setseq_base(uint128_t, uint128_t, pcg_detail.xsl_rr_rr_mixin, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
@@ -308,6 +384,7 @@ def setseq_xsl_rr_rr_128_128(*seed_args, **seed_kwargs):
 
 # Extended generators
 
+# These don't have itype/xtype yet, the BaseRNG argument does.
 def ext_std8(table_pow2, advance_pow2, BaseRNG, kdd=True, *seed_args, **seed_kwargs):
     rv = pcg_detail.Extended(table_pow2, advance_pow2, BaseRNG, oneseq_rxs_m_xs_8_8, kdd, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
@@ -325,30 +402,37 @@ def ext_std64(table_pow2, advance_pow2, BaseRNG, kdd=True, *seed_args, **seed_kw
     rv.seed(*seed_args, **seed_kwargs)
     return rv
 
+@_alias(wrap=oneseq_rxs_m_xs_32_32)
 def ext_oneseq_rxs_m_xs_32_32(table_pow2, advance_pow2, kdd=True, *seed_args, **seed_kwargs):
     rv = ext_std32(table_pow2, advance_pow2, oneseq_rxs_m_xs_32_32, kdd, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(wrap=mcg_xsh_rs_64_32)
 def ext_mcg_xsh_rs_64_32(table_pow2, advance_pow2, kdd=True, *seed_args, **seed_kwargs):
     rv = ext_std32(table_pow2, advance_pow2, mcg_xsh_rs_64_32, kdd, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(wrap=oneseq_xsh_rs_64_32)
 def ext_oneseq_xsh_rs_64_32(table_pow2, advance_pow2, kdd=True, *seed_args, **seed_kwargs):
     rv = ext_std32(table_pow2, advance_pow2, oneseq_xsh_rs_64_32, kdd, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(wrap=setseq_xsh_rr_64_32)
 def ext_setseq_xsh_rr_64_32(table_pow2, advance_pow2, kdd=True, *seed_args, **seed_kwargs):
     rv = ext_std32(table_pow2, advance_pow2, setseq_xsh_rr_64_32, kdd, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(wrap=mcg_xsl_rr_128_64)
 def ext_mcg_xsl_rr_128_64(table_pow2, advance_pow2, kdd=True, *seed_args, **seed_kwargs):
     rv = ext_std64(table_pow2, advance_pow2, mcg_xsl_rr_128_64, kdd, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(wrap=oneseq_xsl_rr_128_64)
 def ext_oneseq_xsl_rr_128_64(table_pow2, advance_pow2, kdd=True, *seed_args, **seed_kwargs):
     rv = ext_std64(table_pow2, advance_pow2, oneseq_xsl_rr_128_64, kdd, seed=False)
     rv.seed(*seed_args, **seed_kwargs)
     return rv
+@_alias(wrap=setseq_xsl_rr_128_64)
 def ext_setseq_xsl_rr_128_64(table_pow2, advance_pow2, kdd=True, *seed_args, **seed_kwargs):
     rv = ext_std64(table_pow2, advance_pow2, setseq_xsl_rr_128_64, kdd, seed=False)
     rv.seed(*seed_args, **seed_kwargs)

@@ -26,12 +26,21 @@
     Last updated for commit 0ca2e8ea6ba212bdfbc6219c2313c45917e34b8d
 '''
 
+import abc
 import types
 
 from .ints import *
 from . import mixin
 from . import pcg_extras
 from .pointer import *
+
+
+class AbstractEngine(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def __call__(self, bound=None):
+        ''' Generate a random number, either from the native range,
+            or from 0 up to the bound if given.
+        '''
 
 
 # The LCG generators need some constants to function.  This code lets you
@@ -178,7 +187,7 @@ class specific_stream:
         return self.itype.BITS - 1
 
 
-class Engine:
+class Engine(AbstractEngine):
     ''' This is where it all comes together.
 
         This class dynamically joins the three mixin classes which define
@@ -811,7 +820,7 @@ class inside_out:
         ptr_randval.put(baseclass._output(state))
         return crosses_zero
 
-class Extended:
+class Extended(AbstractEngine):
     ''' From small pieces, greater things are built.
 
         In the C++ version, this uses inheritance rather than composition.

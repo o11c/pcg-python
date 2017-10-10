@@ -49,8 +49,7 @@ def main():
         rng = RNG()
     else:
         # Insecurely seeding is slightly painful. This is a Good Thing™.
-        rng = RNG(seed=False)
-        itype = rng.itype
+        itype = RNG.itype
         if TWO_ARG_INIT:
             rng = RNG(itype(42), itype(54))
         else:

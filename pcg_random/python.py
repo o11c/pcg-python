@@ -20,7 +20,7 @@
 '''
 
 import random
-from .pcg_detail import Engine, Extended
+from .pcg_detail import AbstractEngine
 from .pcg_engines import setseq_xsh_rr_64_32 as pcg32
 
 
@@ -33,10 +33,8 @@ class PcgRandom(random.Random):
         return super().__new__(cls)
 
     def __init__(self, engine=pcg32, *seed_args, **seed_kwargs):
-        if not isinstance(engine, (Engine, Extended)):
-            engine = engine(seed=False)
-            self._engine = engine
-            self.seed(*seed_args, **seed_kwargs)
+        if not isinstance(engine, AbstractEngine):
+            self._engine = engine(*seed_args, **seed_kwargs)
         else:
             assert not seed_args and not seed_kwargs
             self._engine = engine
