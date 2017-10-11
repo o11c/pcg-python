@@ -71,4 +71,9 @@ class PcgRandom(random.Random):
         #
         # However, other than underflow, dividing by powers of 2 is safe
         # in any language.
-        return self.getrandbits(64) / 2**64
+
+        # The int-to-float conversion rounds to nearest, but correct
+        # result rely on truncation. Consider if the RNG produced 2**64-1.
+        # (There are other problems if addition is used on the result)
+        # UNSAFE: return self.getrandbits(64) / 2**64
+        return self.getrandbits(53) / 2**53
